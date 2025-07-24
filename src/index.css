@@ -7,29 +7,29 @@
 @layer base {
   :root {
     /* Core medical interface colors */
-    --background: 248 250 252;
+    --background: 0 0% 100%;
     --foreground: 208 21% 17%;
 
-    --card: 0 0% 100%;
+    --card: 0 0% 98%;
     --card-foreground: 208 21% 17%;
 
-    --popover: 0 0% 100%;
+    --popover: 0 0% 98%;
     --popover-foreground: 208 21% 17%;
 
     /* Medical primary - professional blue */
-    --primary: 214 89% 52%;
+    --primary: 208 75% 63%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 214 89% 47%;
+    --primary-hover: 208 75% 58%;
 
     /* Medical secondary - light blue */
-    --secondary: 214 32% 91%;
+    --secondary: 205 89% 73%;
     --secondary-foreground: 208 21% 17%;
 
     /* Medical neutral tones */
-    --muted: 220 14% 96%;
+    --muted: 0 0% 98%;
     --muted-foreground: 215 25% 47%;
 
-    --accent: 214 32% 91%;
+    --accent: 205 89% 73%;
     --accent-foreground: 208 21% 17%;
 
     /* Medical status colors */
@@ -45,7 +45,7 @@
     /* Medical interface elements */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 214 89% 52%;
+    --ring: 208 75% 63%;
 
     --radius: 0.75rem;
 
@@ -53,17 +53,17 @@
 
     --sidebar-foreground: 240 5.3% 26.1%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 208 75% 63%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 100%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 205 89% 73%;
 
     --sidebar-accent-foreground: 240 5.9% 10%;
 
     --sidebar-border: 220 13% 91%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 208 75% 63%;
   }
 }
 

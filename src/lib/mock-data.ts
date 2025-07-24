@@ -10,6 +10,14 @@ export interface Facility {
   crowdLevel: 'Low' | 'Medium' | 'High';
   capabilities: string[];
   specialties: string[];
+  recentActivity: number; // e.g., number of referrals in the last 24h
+}
+
+export interface Doctor {
+  id: string;
+  name: string;
+  specialty: string;
+  schedule: Record<string, string>; // e.g., { "Monday": "9am - 5pm", ... }
 }
 
 export interface Patient {
@@ -56,7 +64,8 @@ export const mockFacilities: Facility[] = [
     totalBeds: 50,
     crowdLevel: 'Low',
     capabilities: ['MRI', 'CT Scan', 'X-Ray', 'Ultrasound', 'ECG'],
-    specialties: ['Cardiology', 'Neurology', 'Emergency Medicine', 'Surgery']
+    specialties: ['Cardiology', 'Neurology', 'Emergency Medicine', 'Surgery'],
+    recentActivity: 25
   },
   {
     id: 'f2',
@@ -67,7 +76,8 @@ export const mockFacilities: Facility[] = [
     totalBeds: 75,
     crowdLevel: 'Medium',
     capabilities: ['MRI', 'CT Scan', 'X-Ray', 'Ultrasound', 'ECG', 'Angiography'],
-    specialties: ['Cardiology', 'Oncology', 'Orthopedics', 'Emergency Medicine']
+    specialties: ['Cardiology', 'Oncology', 'Orthopedics', 'Emergency Medicine'],
+    recentActivity: 42
   },
   {
     id: 'f3',
@@ -78,7 +88,8 @@ export const mockFacilities: Facility[] = [
     totalBeds: 120,
     crowdLevel: 'Low',
     capabilities: ['MRI', 'CT Scan', 'X-Ray', 'Ultrasound', 'ECG', 'Angiography', 'PET Scan'],
-    specialties: ['Cardiology', 'Neurology', 'Oncology', 'Pediatrics', 'Surgery', 'Research']
+    specialties: ['Cardiology', 'Neurology', 'Oncology', 'Pediatrics', 'Surgery', 'Research'],
+    recentActivity: 31
   },
   {
     id: 'f4',
@@ -89,7 +100,8 @@ export const mockFacilities: Facility[] = [
     totalBeds: 30,
     crowdLevel: 'High',
     capabilities: ['X-Ray', 'Ultrasound', 'ECG', 'Basic Surgery'],
-    specialties: ['Emergency Medicine', 'Trauma', 'Critical Care']
+    specialties: ['Emergency Medicine', 'Trauma', 'Critical Care'],
+    recentActivity: 58
   },
   {
     id: 'f5',
@@ -100,7 +112,112 @@ export const mockFacilities: Facility[] = [
     totalBeds: 60,
     crowdLevel: 'Medium',
     capabilities: ['MRI', 'CT Scan', 'X-Ray', 'Ultrasound', 'ECG', 'Angiography', 'PET Scan', 'Advanced Surgery'],
-    specialties: ['Cardiology', 'Neurosurgery', 'Oncology', 'Transplant', 'Research']
+    specialties: ['Cardiology', 'Neurosurgery', 'Oncology', 'Transplant', 'Research'],
+    recentActivity: 29
+  }
+];
+
+// Mock doctors data
+export const mockDoctors: Doctor[] = [
+  // Cardiology
+  {
+    id: 'd1',
+    name: 'Dr. Emily Carter',
+    specialty: 'Cardiology',
+    schedule: { Monday: '9am - 5pm', Wednesday: '10am - 6pm', Friday: '8am - 4pm' }
+  },
+  {
+    id: 'd5',
+    name: 'Dr. Johnathan Lee',
+    specialty: 'Cardiology',
+    schedule: { Tuesday: '9am - 5pm', Thursday: '10am - 6pm', Saturday: '9am - 1pm' }
+  },
+  {
+    id: 'd6',
+    name: 'Dr. Sophia Garcia',
+    specialty: 'Cardiology',
+    schedule: { Monday: '8am - 4pm', Wednesday: '9am - 5pm', Friday: '10am - 6pm' }
+  },
+  {
+    id: 'd7',
+    name: 'Dr. Michael Brown',
+    specialty: 'Cardiology',
+    schedule: { Tuesday: '10am - 6pm', Thursday: '8am - 4pm' }
+  },
+  // Neurology
+  {
+    id: 'd2',
+    name: 'Dr. Ben Adams',
+    specialty: 'Neurology',
+    schedule: { Tuesday: '8am - 4pm', Thursday: '11am - 7pm' }
+  },
+  {
+    id: 'd8',
+    name: 'Dr. Chloe Kim',
+    specialty: 'Neurology',
+    schedule: { Monday: '10am - 6pm', Wednesday: '8am - 4pm', Friday: '9am - 5pm' }
+  },
+  {
+    id: 'd9',
+    name: 'Dr. David Martinez',
+    specialty: 'Neurology',
+    schedule: { Monday: '9am - 5pm', Thursday: '9am - 5pm' }
+  },
+  {
+    id: 'd10',
+    name: 'Dr. Laura Wilson',
+    specialty: 'Neurology',
+    schedule: { Wednesday: '10am - 6pm', Friday: '8am - 4pm' }
+  },
+  // Emergency Medicine
+  {
+    id: 'd3',
+    name: 'Dr. Olivia Chen',
+    specialty: 'Emergency Medicine',
+    schedule: { Monday: '2pm - 10pm', Tuesday: '2pm - 10pm', Friday: '6pm - 2am', Saturday: '6pm - 2am' }
+  },
+  {
+    id: 'd11',
+    name: 'Dr. Daniel Taylor',
+    specialty: 'Emergency Medicine',
+    schedule: { Wednesday: '10pm - 6am', Thursday: '10pm - 6am', Sunday: '8pm - 4am' }
+  },
+  {
+    id: 'd12',
+    name: 'Dr. Hannah Wright',
+    specialty: 'Emergency Medicine',
+    schedule: { Monday: '6am - 2pm', Tuesday: '6am - 2pm', Saturday: '8am - 4pm' }
+  },
+  {
+    id: 'd13',
+    name: 'Dr. Chris Evans',
+    specialty: 'Emergency Medicine',
+    schedule: { Wednesday: '8am - 8pm', Sunday: '8am - 8pm' }
+  },
+  // Orthopedics
+  {
+    id: 'd4',
+    name: 'Dr. James Rodriguez',
+    specialty: 'Orthopedics',
+    schedule: { Monday: '9am - 5pm', Tuesday: '9am - 1pm (Surgery)', Thursday: '9am - 5pm' }
+  },
+  {
+    id: 'd14',
+    name: 'Dr. Jessica Miller',
+    specialty: 'Orthopedics',
+    schedule: { Wednesday: '8am - 4pm', Friday: '9am - 5pm' }
+  },
+  {
+    id: 'd15',
+    name: 'Dr. Brian Clark',
+    specialty: 'Orthopedics',
+    schedule: { Tuesday: '1pm - 7pm', Thursday: '8am - 12pm (Surgery)' }
+  },
+  {
+    id: 'd16',
+    name: 'Dr. Sarah Davis',
+    specialty: 'Orthopedics',
+    schedule: { Monday: '10am - 6pm', Friday: '10am - 6pm' }
   }
 ];
 
@@ -167,7 +284,56 @@ export const mockReferralRequests: ReferralRequest[] = [
     urgency: 'High',
     status: 'Approved',
     selectedData: ['Patient Vitals', 'Lab Results', 'Doctor\'s Notes'],
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+  },
+  {
+    id: 'r3',
+    patientId: 'p1',
+    fromFacility: "St. Mary's General Hospital",
+    toFacility: 'Metropolitan Medical Center',
+    diagnosis: 'Follow-up Consultation',
+    requiredProcedures: ['Cardiology'],
+    urgency: 'Medium',
+    status: 'Completed',
+    selectedData: ['Medical History', 'Doctor\'s Notes'],
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'r4',
+    patientId: 'p2',
+    fromFacility: "St. Mary's General Hospital",
+    toFacility: 'University Teaching Hospital',
+    diagnosis: 'Specialist Evaluation',
+    requiredProcedures: ['Neurology'],
+    urgency: 'Low',
+    status: 'Approved',
+    selectedData: ['Medical History', 'Lab Results'],
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'r5',
+    patientId: 'p1',
+    fromFacility: "St. Mary's General Hospital",
+    toFacility: 'City Emergency Center',
+    diagnosis: 'Trauma Care',
+    requiredProcedures: ['X-Ray'],
+    urgency: 'High',
+    status: 'Rejected',
+    rejectionReason: 'Facility at full capacity',
+    selectedData: ['Patient Vitals', 'Doctor\'s Notes'],
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'r6',
+    patientId: 'p2',
+    fromFacility: "St. Mary's General Hospital",
+    toFacility: 'Regional Specialty Institute',
+    diagnosis: 'Oncology Consultation',
+    requiredProcedures: ['PET Scan'],
+    urgency: 'Medium',
+    status: 'Completed',
+    selectedData: ['Medical History', 'Lab Results', 'Doctor\'s Notes'],
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
   }
 ];
 
