@@ -65,8 +65,7 @@
 
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-
-  }
+}
 
 /* Medical interface typography and spacing */
 @layer components {
@@ -101,7 +100,6 @@
   .medical-button-secondary {
     @apply bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 py-3 rounded-lg font-medium transition-colors;
   }
-}
 }
 
 @layer base {
