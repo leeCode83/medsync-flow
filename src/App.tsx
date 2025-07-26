@@ -21,7 +21,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/referral/new" element={<NewReferral />} />
-            <Route path="/referral/data-transfer/:referralId" element={<DataTransfer />} />
+            <Route path="/history" element={<DataTransfer />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

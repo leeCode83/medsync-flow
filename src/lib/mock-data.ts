@@ -24,6 +24,8 @@ export interface Patient {
   id: string;
   name: string;
   age: number;
+  gender: 'Male' | 'Female' | 'Other';
+  bloodType: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
   diagnosis: string;
   requiredProcedures: string[];
   address: string;
@@ -34,15 +36,18 @@ export interface Patient {
     oxygenSaturation: number;
   };
   medicalHistory: string[];
-  labResults: string[];
+  allergies: string[];
+  medications: { name: string; dosage: string; frequency: string }[];
+  labResults: { test: string; result: string; date: string }[];
   doctorNotes: string;
 }
 
 export interface ReferralRequest {
   id: string;
-  patientId: string;
+  patient: Patient;
   fromFacility: string;
   toFacility: string;
+  specialist: string;
   diagnosis: string;
   requiredProcedures: string[];
   urgency: 'Low' | 'Medium' | 'High';
@@ -52,6 +57,9 @@ export interface ReferralRequest {
   notes?: string;
   rejectionReason?: string;
 }
+
+// Define our main facility for context
+export const OUR_FACILITY = "St. Mary's General Hospital";
 
 // Mock facilities data
 export const mockFacilities: Facility[] = [
@@ -132,42 +140,12 @@ export const mockDoctors: Doctor[] = [
     specialty: 'Cardiology',
     schedule: { Tuesday: '9am - 5pm', Thursday: '10am - 6pm', Saturday: '9am - 1pm' }
   },
-  {
-    id: 'd6',
-    name: 'Dr. Sophia Garcia',
-    specialty: 'Cardiology',
-    schedule: { Monday: '8am - 4pm', Wednesday: '9am - 5pm', Friday: '10am - 6pm' }
-  },
-  {
-    id: 'd7',
-    name: 'Dr. Michael Brown',
-    specialty: 'Cardiology',
-    schedule: { Tuesday: '10am - 6pm', Thursday: '8am - 4pm' }
-  },
   // Neurology
   {
     id: 'd2',
     name: 'Dr. Ben Adams',
     specialty: 'Neurology',
     schedule: { Tuesday: '8am - 4pm', Thursday: '11am - 7pm' }
-  },
-  {
-    id: 'd8',
-    name: 'Dr. Chloe Kim',
-    specialty: 'Neurology',
-    schedule: { Monday: '10am - 6pm', Wednesday: '8am - 4pm', Friday: '9am - 5pm' }
-  },
-  {
-    id: 'd9',
-    name: 'Dr. David Martinez',
-    specialty: 'Neurology',
-    schedule: { Monday: '9am - 5pm', Thursday: '9am - 5pm' }
-  },
-  {
-    id: 'd10',
-    name: 'Dr. Laura Wilson',
-    specialty: 'Neurology',
-    schedule: { Wednesday: '10am - 6pm', Friday: '8am - 4pm' }
   },
   // Emergency Medicine
   {
@@ -176,24 +154,6 @@ export const mockDoctors: Doctor[] = [
     specialty: 'Emergency Medicine',
     schedule: { Monday: '2pm - 10pm', Tuesday: '2pm - 10pm', Friday: '6pm - 2am', Saturday: '6pm - 2am' }
   },
-  {
-    id: 'd11',
-    name: 'Dr. Daniel Taylor',
-    specialty: 'Emergency Medicine',
-    schedule: { Wednesday: '10pm - 6am', Thursday: '10pm - 6am', Sunday: '8pm - 4am' }
-  },
-  {
-    id: 'd12',
-    name: 'Dr. Hannah Wright',
-    specialty: 'Emergency Medicine',
-    schedule: { Monday: '6am - 2pm', Tuesday: '6am - 2pm', Saturday: '8am - 4pm' }
-  },
-  {
-    id: 'd13',
-    name: 'Dr. Chris Evans',
-    specialty: 'Emergency Medicine',
-    schedule: { Wednesday: '8am - 8pm', Sunday: '8am - 8pm' }
-  },
   // Orthopedics
   {
     id: 'd4',
@@ -201,24 +161,6 @@ export const mockDoctors: Doctor[] = [
     specialty: 'Orthopedics',
     schedule: { Monday: '9am - 5pm', Tuesday: '9am - 1pm (Surgery)', Thursday: '9am - 5pm' }
   },
-  {
-    id: 'd14',
-    name: 'Dr. Jessica Miller',
-    specialty: 'Orthopedics',
-    schedule: { Wednesday: '8am - 4pm', Friday: '9am - 5pm' }
-  },
-  {
-    id: 'd15',
-    name: 'Dr. Brian Clark',
-    specialty: 'Orthopedics',
-    schedule: { Tuesday: '1pm - 7pm', Thursday: '8am - 12pm (Surgery)' }
-  },
-  {
-    id: 'd16',
-    name: 'Dr. Sarah Davis',
-    specialty: 'Orthopedics',
-    schedule: { Monday: '10am - 6pm', Friday: '10am - 6pm' }
-  }
 ];
 
 // Mock patients data
@@ -227,25 +169,38 @@ export const mockPatients: Patient[] = [
     id: 'p1',
     name: 'John Anderson',
     age: 65,
-    diagnosis: 'Cardiac Arrest',
-    requiredProcedures: ['Angiography', 'ECG'],
+    gender: 'Male',
+    bloodType: 'O+',
+    diagnosis: 'Acute Coronary Syndrome',
+    requiredProcedures: ['Angiography', 'ECG', 'Cardiac Enzyme Test'],
     address: '142 Pine St, Residential Area',
     vitals: {
-      bloodPressure: '140/90',
-      heartRate: 88,
-      temperature: 98.6,
-      oxygenSaturation: 95
+      bloodPressure: '145/92',
+      heartRate: 95,
+      temperature: 98.7,
+      oxygenSaturation: 94
     },
     medicalHistory: ['Hypertension', 'Type 2 Diabetes', 'Previous Heart Attack (2019)'],
-    labResults: ['Elevated Cholesterol', 'High Blood Sugar', 'Abnormal ECG'],
-    doctorNotes: 'Patient presented with chest pain and shortness of breath. Requires immediate cardiac intervention.'
+    allergies: ['Penicillin'],
+    medications: [
+      { name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily' },
+      { name: 'Metformin', dosage: '500mg', frequency: 'Twice daily' },
+      { name: 'Aspirin', dosage: '81mg', frequency: 'Once daily' },
+    ],
+    labResults: [
+      { test: 'Troponin I', result: '0.8 ng/mL (Elevated)', date: '2024-07-20' },
+      { test: 'Cholesterol', result: '220 mg/dL (High)', date: '2024-07-15' },
+    ],
+    doctorNotes: 'Patient presented with severe chest pain radiating to the left arm. ECG shows ST-segment elevation. Suspected myocardial infarction. Requires urgent cardiac catheterization.'
   },
   {
     id: 'p2',
     name: 'Sarah Williams',
     age: 34,
-    diagnosis: 'Appendicitis',
-    requiredProcedures: ['CT Scan', 'Surgery'],
+    gender: 'Female',
+    bloodType: 'A-',
+    diagnosis: 'Suspected Appendicitis',
+    requiredProcedures: ['Abdominal CT Scan', 'Complete Blood Count (CBC)'],
     address: '789 Oak Ave, Suburbia',
     vitals: {
       bloodPressure: '120/80',
@@ -254,32 +209,115 @@ export const mockPatients: Patient[] = [
       oxygenSaturation: 98
     },
     medicalHistory: ['No significant past medical history'],
-    labResults: ['Elevated White Blood Cell Count', 'Signs of Inflammation'],
-    doctorNotes: 'Patient experiencing severe abdominal pain. CT scan confirms acute appendicitis requiring immediate surgical intervention.'
+    allergies: ['None'],
+    medications: [],
+    labResults: [
+      { test: 'White Blood Cell Count', result: '15,000/uL (Elevated)', date: '2024-07-21' },
+    ],
+    doctorNotes: 'Patient reports sharp pain in the lower right abdomen, nausea, and fever. Physical exam shows rebound tenderness. High suspicion for appendicitis; needs imaging to confirm before surgery.'
+  },
+  {
+    id: 'p3',
+    name: 'David Chen',
+    age: 72,
+    gender: 'Male',
+    bloodType: 'B+',
+    diagnosis: 'Ischemic Stroke',
+    requiredProcedures: ['Head CT Scan', 'Neurological Assessment'],
+    address: '555 Maple Dr, City Center',
+    vitals: {
+      bloodPressure: '160/100',
+      heartRate: 80,
+      temperature: 98.5,
+      oxygenSaturation: 96
+    },
+    medicalHistory: ['Atrial Fibrillation', 'High Cholesterol'],
+    allergies: ['None'],
+    medications: [
+      { name: 'Warfarin', dosage: '5mg', frequency: 'Once daily' },
+      { name: 'Atorvastatin', dosage: '40mg', frequency: 'Once daily' },
+    ],
+    labResults: [
+      { test: 'INR', result: '2.5', date: '2024-07-20' },
+    ],
+    doctorNotes: 'Patient presented with sudden onset of left-sided weakness and facial droop. NIH Stroke Scale score is 8. Urgent CT needed to rule out hemorrhage before considering thrombolytic therapy.'
+  },
+  {
+    id: 'p4',
+    name: 'Maria Garcia',
+    age: 58,
+    gender: 'Female',
+    bloodType: 'AB+',
+    diagnosis: 'Severe Pneumonia',
+    requiredProcedures: ['Chest X-Ray', 'Sputum Culture'],
+    address: '101 River Rd, West End',
+    vitals: {
+      bloodPressure: '130/85',
+      heartRate: 110,
+      temperature: 102.5,
+      oxygenSaturation: 91
+    },
+    medicalHistory: ['COPD', 'Smoker'],
+    allergies: ['Sulfa drugs'],
+    medications: [
+      { name: 'Albuterol Inhaler', dosage: 'As needed', frequency: 'q4h' },
+    ],
+    labResults: [
+      { test: 'CRP', result: '150 mg/L (Elevated)', date: '2024-07-22' },
+    ],
+    doctorNotes: 'Patient has worsening shortness of breath and productive cough. Chest X-ray shows consolidation in the right lower lobe. Requires admission for IV antibiotics and respiratory support.'
+  },
+  {
+    id: 'p5',
+    name: 'James Brown',
+    age: 45,
+    gender: 'Male',
+    bloodType: 'B-',
+    diagnosis: 'Kidney Stone',
+    requiredProcedures: ['Ultrasound', 'Urology Consult'],
+    address: '212 Stone Ave, Northside',
+    vitals: {
+      bloodPressure: '150/95',
+      heartRate: 90,
+      temperature: 99.0,
+      oxygenSaturation: 99
+    },
+    medicalHistory: ['Previous kidney stones'],
+    allergies: ['None'],
+    medications: [
+      { name: 'Ibuprofen', dosage: '600mg', frequency: 'As needed for pain' },
+    ],
+    labResults: [
+      { test: 'Urinalysis', result: 'Hematuria', date: '2024-07-22' },
+    ],
+    doctorNotes: 'Patient presents with severe flank pain. High suspicion for obstructive kidney stone. Needs imaging to confirm size and location for urology intervention.'
   }
 ];
 
 // Mock referral requests
 export const mockReferralRequests: ReferralRequest[] = [
+  // Active Referrals (for other cards)
   {
     id: 'r1',
-    patientId: 'p1',
+    patient: mockPatients[0],
     fromFacility: 'Community Health Clinic',
-    toFacility: 'St. Mary\'s General Hospital',
-    diagnosis: 'Cardiac Arrest',
+    toFacility: OUR_FACILITY, // Ingoing, Approved
+    specialist: 'Cardiology',
+    diagnosis: 'Acute Coronary Syndrome',
     requiredProcedures: ['Angiography', 'ECG'],
     urgency: 'High',
-    status: 'Pending',
+    status: 'Approved',
     selectedData: ['Patient Vitals', 'Medical History', 'Lab Results', 'Doctor\'s Notes'],
-    createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+    createdAt: new Date(Date.now() - 30 * 60 * 1000),
     notes: 'Urgent cardiac case requiring immediate attention'
   },
   {
     id: 'r2',
-    patientId: 'p2',
-    fromFacility: 'Downtown Urgent Care',
-    toFacility: 'Metropolitan Medical Center',
-    diagnosis: 'Appendicitis',
+    patient: mockPatients[1],
+    fromFacility: OUR_FACILITY,
+    toFacility: 'Metropolitan Medical Center', // Outgoing, Approved
+    specialist: 'General Surgery',
+    diagnosis: 'Suspected Appendicitis',
     requiredProcedures: ['CT Scan', 'Surgery'],
     urgency: 'High',
     status: 'Approved',
@@ -288,33 +326,52 @@ export const mockReferralRequests: ReferralRequest[] = [
   },
   {
     id: 'r3',
-    patientId: 'p1',
-    fromFacility: "St. Mary's General Hospital",
+    patient: mockPatients[2],
+    fromFacility: 'City Emergency Center',
+    toFacility: 'University Teaching Hospital', // Not involving us, but pending
+    specialist: 'Neurology',
+    diagnosis: 'Ischemic Stroke',
+    requiredProcedures: ['Head CT Scan', 'Neurological Assessment'],
+    urgency: 'High',
+    status: 'Pending',
+    selectedData: ['Patient Vitals', 'Medical History', 'Doctor\'s Notes'],
+    createdAt: new Date(Date.now() - 45 * 60 * 1000),
+    notes: 'Patient is within the window for tPA administration. Time is critical.'
+  },
+  
+  // History: Outgoing from OUR_FACILITY
+  {
+    id: 'r4',
+    patient: mockPatients[0],
+    fromFacility: OUR_FACILITY,
     toFacility: 'Metropolitan Medical Center',
+    specialist: 'Cardiology',
     diagnosis: 'Follow-up Consultation',
-    requiredProcedures: ['Cardiology'],
+    requiredProcedures: ['Echocardiogram'],
     urgency: 'Medium',
     status: 'Completed',
     selectedData: ['Medical History', 'Doctor\'s Notes'],
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
   },
   {
-    id: 'r4',
-    patientId: 'p2',
-    fromFacility: "St. Mary's General Hospital",
+    id: 'r5',
+    patient: mockPatients[1],
+    fromFacility: OUR_FACILITY,
     toFacility: 'University Teaching Hospital',
-    diagnosis: 'Specialist Evaluation',
-    requiredProcedures: ['Neurology'],
+    specialist: 'Orthopedics',
+    diagnosis: 'Post-operative Checkup',
+    requiredProcedures: ['X-Ray'],
     urgency: 'Low',
-    status: 'Approved',
+    status: 'Completed',
     selectedData: ['Medical History', 'Lab Results'],
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
   },
   {
-    id: 'r5',
-    patientId: 'p1',
-    fromFacility: "St. Mary's General Hospital",
+    id: 'r6',
+    patient: mockPatients[0],
+    fromFacility: OUR_FACILITY,
     toFacility: 'City Emergency Center',
+    specialist: 'Emergency Medicine',
     diagnosis: 'Trauma Care',
     requiredProcedures: ['X-Ray'],
     urgency: 'High',
@@ -323,17 +380,63 @@ export const mockReferralRequests: ReferralRequest[] = [
     selectedData: ['Patient Vitals', 'Doctor\'s Notes'],
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
   },
+
+  // History: Ingoing to OUR_FACILITY
   {
-    id: 'r6',
-    patientId: 'p2',
-    fromFacility: "St. Mary's General Hospital",
-    toFacility: 'Regional Specialty Institute',
-    diagnosis: 'Oncology Consultation',
-    requiredProcedures: ['PET Scan'],
+    id: 'r9',
+    patient: mockPatients[3],
+    fromFacility: 'Metropolitan Medical Center',
+    toFacility: OUR_FACILITY,
+    specialist: 'Pulmonology',
+    diagnosis: 'Pneumonia Follow-up',
+    requiredProcedures: ['Chest X-Ray'],
+    urgency: 'Low',
+    status: 'Completed',
+    selectedData: ['Medical History', 'Doctor\'s Notes'],
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'r10',
+    patient: mockPatients[4],
+    fromFacility: 'Regional Specialty Institute',
+    toFacility: OUR_FACILITY,
+    specialist: 'Urology',
+    diagnosis: 'Post-op Kidney Stone',
+    requiredProcedures: ['Ultrasound'],
     urgency: 'Medium',
     status: 'Completed',
-    selectedData: ['Medical History', 'Lab Results', 'Doctor\'s Notes'],
+    selectedData: ['Medical History', 'Lab Results'],
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+  },
+
+  // Pending (for other card)
+  {
+    id: 'r7',
+    patient: mockPatients[3],
+    fromFacility: 'Community Health Clinic',
+    toFacility: 'Metropolitan Medical Center',
+    specialist: 'Pulmonology',
+    diagnosis: 'Severe Pneumonia',
+    requiredProcedures: ['Chest X-Ray', 'IV Antibiotics'],
+    urgency: 'High',
+    status: 'Pending',
+    selectedData: ['Patient Vitals', 'Medical History', 'Lab Results', 'Doctor\'s Notes'],
+    createdAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000),
+    notes: 'Patient requires immediate admission and respiratory support.'
+  },
+  {
+    id: 'r8',
+    patient: mockPatients[4],
+    fromFacility: 'Downtown Urgent Care',
+    toFacility: 'Regional Specialty Institute',
+    specialist: 'Urology',
+    diagnosis: 'Kidney Stone',
+    requiredProcedures: ['Ultrasound', 'Urology Consult'],
+    urgency: 'Medium',
+    status: 'Pending',
+    selectedData: ['Patient Vitals', 'Lab Results', 'Doctor\'s Notes'],
+    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    notes: 'Patient in significant pain, requires urgent consultation.'
   }
 ];
 
@@ -443,4 +546,34 @@ export function getRecommendedFacilities(
     })
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
+}
+
+// Get active referrals
+export function getActiveReferrals(): ReferralRequest[] {
+  return mockReferralRequests.filter(r => r.status === 'Approved' || r.status === 'Pending');
+}
+
+// Get pending referrals
+export function getPendingReferrals(): ReferralRequest[] {
+  return mockReferralRequests.filter(r => r.status === 'Pending');
+}
+
+// Get referral history
+export function getReferralHistory(): ReferralRequest[] {
+  return mockReferralRequests.filter(r => r.status === 'Completed' || r.status === 'Rejected');
+}
+
+// Get system stats
+export function getSystemStats() {
+  const totalReferrals = mockReferralRequests.length;
+  const successfulReferrals = mockReferralRequests.filter(r => r.status === 'Completed').length;
+  const averageTransferTime = 35; // in minutes, mock value
+  const patientSatisfaction = 92; // percentage, mock value
+  
+  return {
+    totalReferrals,
+    successfulReferrals,
+    averageTransferTime,
+    patientSatisfaction
+  };
 }

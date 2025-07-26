@@ -1,102 +1,103 @@
-import React from 'react';
-import { History, ArrowRight, CheckCircle, XCircle, Clock } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { History, ArrowRight, CheckCircle, XCircle, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ReferralRequest } from '@/lib/mock-data';
+import { Button } from '@/components/ui/button';
+import { ReferralRequest, OUR_FACILITY } from '@/lib/mock-data';
+import { cn } from '@/lib/utils';
 
 interface ReferralHistoryCardProps {
-  title: string;
   referrals: ReferralRequest[];
-  type: 'incoming' | 'outgoing';
 }
 
-const ReferralHistoryCard: React.FC<ReferralHistoryCardProps> = ({
-  title,
-  referrals,
-  type
-}) => {
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Approved': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'Rejected': return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'Pending': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'Completed': return <CheckCircle className="h-4 w-4 text-blue-500" />;
-      default: return <Clock className="h-4 w-4 text-gray-500" />;
-    }
-  };
+type FilterType = 'outgoing' | 'ingoing';
+
+const ReferralHistoryCard: React.FC<ReferralHistoryCardProps> = ({ referrals }) => {
+  const [filter, setFilter] = useState<FilterType>('outgoing');
+
+  const filteredReferrals = useMemo(() => {
+    return referrals.filter(r => {
+      if (filter === 'outgoing') return r.fromFacility === OUR_FACILITY;
+      if (filter === 'ingoing') return r.toFacility === OUR_FACILITY;
+      return false;
+    });
+  }, [referrals, filter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Approved': return 'text-green-600 bg-green-50';
-      case 'Rejected': return 'text-red-600 bg-red-50';
-      case 'Pending': return 'text-yellow-600 bg-yellow-50';
-      case 'Completed': return 'text-blue-600 bg-blue-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'Completed': return 'text-blue-600 bg-blue-100';
+      case 'Rejected': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
     }
   };
 
   return (
     <Card className="medical-card">
-      <CardHeader className="pb-3">
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <History className="h-5 w-5 text-primary" />
-          {title}
-          {referrals.length > 0 && (
-            <span className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded-full">
-              {referrals.length}
-            </span>
-          )}
+          Referral History
         </CardTitle>
+        <div className="flex items-center gap-1 bg-muted p-1 rounded-md">
+          <Button
+            variant={filter === 'outgoing' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setFilter('outgoing')}
+            className="h-8 px-3"
+          >
+            <ArrowUpRight className="h-4 w-4 mr-2" />
+            Outgoing
+          </Button>
+          <Button
+            variant={filter === 'ingoing' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setFilter('ingoing')}
+            className="h-8 px-3"
+          >
+            <ArrowDownLeft className="h-4 w-4 mr-2" />
+            Ingoing
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        {referrals.length === 0 ? (
+        {filteredReferrals.length === 0 ? (
           <p className="text-muted-foreground text-center py-6">
-            No {type} referrals found
+            No {filter} referrals found.
           </p>
         ) : (
           <div className="space-y-3">
-            {referrals.slice(0, 5).map((referral) => (
+            {filteredReferrals.map((referral) => (
               <div key={referral.id} className="border border-border rounded-lg p-3">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <h4 className="font-semibold text-foreground mb-1">
-                      {referral.diagnosis}
+                      {referral.patient.name} - {referral.diagnosis}
                     </h4>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                      <span>{type === 'outgoing' ? referral.fromFacility : referral.toFacility}</span>
+                      <span>{referral.fromFacility}</span>
                       <ArrowRight className="h-3 w-3" />
-                      <span>{type === 'outgoing' ? referral.toFacility : referral.fromFacility}</span>
+                      <span>{referral.toFacility}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {referral.createdAt.toLocaleDateString()} at {referral.createdAt.toLocaleTimeString()}
+                      {new Date(referral.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {getStatusIcon(referral.status)}
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(referral.status)}`}>
+                    <span className={cn(
+                      "px-2 py-1 rounded-full text-xs font-medium",
+                      getStatusColor(referral.status)
+                    )}>
                       {referral.status}
                     </span>
                   </div>
                 </div>
                 
-                {referral.requiredProcedures.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Procedures: {referral.requiredProcedures.join(', ')}
-                  </p>
-                )}
-                
                 {referral.rejectionReason && referral.status === 'Rejected' && (
-                  <p className="text-xs text-red-600 mt-1 p-2 bg-red-50 rounded">
-                    Rejection reason: {referral.rejectionReason}
+                  <p className="text-xs text-red-600 mt-1 p-2 bg-red-50/50 rounded">
+                    <strong>Reason:</strong> {referral.rejectionReason}
                   </p>
                 )}
               </div>
             ))}
-            
-            {referrals.length > 5 && (
-              <p className="text-center text-sm text-muted-foreground pt-2">
-                ... and {referrals.length - 5} more
-              </p>
-            )}
           </div>
         )}
       </CardContent>

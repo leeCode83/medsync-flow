@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Plus, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BedAvailabilityCard from '@/components/BedAvailabilityCard';
 import PendingReferralsCard from '@/components/PendingReferralsCard';
 import ReferralHistoryCard from '@/components/ReferralHistoryCard';
 import SystemStatsCard from '@/components/SystemStatsCard';
 import DoctorScheduleModal from '@/components/DoctorScheduleModal';
+import ActiveReferralsCard from '@/components/ActiveReferralsCard';
 import {
   mockReferralRequests,
   ReferralRequest,
@@ -19,7 +19,6 @@ const Dashboard: React.FC = () => {
   // State for referral requests
   const [referralRequests, setReferralRequests] = useState<ReferralRequest[]>(mockReferralRequests);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-  const [activeHistoryView, setActiveHistoryView] = useState<'incoming' | 'outgoing'>('incoming');
 
   // Mock current facility data
   const currentFacility = {
@@ -30,8 +29,9 @@ const Dashboard: React.FC = () => {
 
   // Filter referrals by status and type
   const pendingReferrals = referralRequests.filter(r => r.status === 'Pending');
-  const incomingReferrals = referralRequests.filter(r => r.status !== 'Pending');
-  const outgoingReferrals = referralRequests.filter(r => r.fromFacility === 'St. Mary\'s General Hospital');
+  const activeReferrals = referralRequests.filter(r => r.status === 'Approved');
+  const referralHistory = referralRequests.filter(r => r.status === 'Completed' || r.status === 'Rejected');
+
 
   const handleApproveReferral = (referralId: string) => {
     setReferralRequests(prev =>
@@ -72,64 +72,31 @@ const Dashboard: React.FC = () => {
           </Link>
         </div>
 
-        {/* Top Row - Facility Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <BedAvailabilityCard
-            availableBeds={currentFacility.availableBeds}
-            totalBeds={currentFacility.totalBeds}
-            crowdLevel={currentFacility.crowdLevel}
-          />
-
-          <SystemStatsCard
-            facilities={mockFacilities}
-            onOpenSchedule={() => setIsScheduleModalOpen(true)}
-          />
-
-          <div className="lg:col-span-3">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column (Main Content) */}
+          <div className="lg:col-span-2 space-y-6">
             <PendingReferralsCard
               pendingReferrals={pendingReferrals}
               onApprove={handleApproveReferral}
               onReject={handleRejectReferral}
             />
-          </div>
-        </div>
-
-        {/* Referral History Section */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-foreground">Referral History</h2>
-            <ToggleGroup
-              type="single"
-              value={activeHistoryView}
-              onValueChange={(value) => {
-                if (value) setActiveHistoryView(value as 'incoming' | 'outgoing');
-              }}
-              aria-label="Referral History View"
-            >
-              <ToggleGroupItem value="incoming" aria-label="Incoming History">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Incoming
-              </ToggleGroupItem>
-              <ToggleGroupItem value="outgoing" aria-label="Outgoing History">
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Outgoing
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <ActiveReferralsCard referrals={activeReferrals} />
+            <ReferralHistoryCard referrals={referralHistory} />
           </div>
 
-          {activeHistoryView === 'incoming' ? (
-            <ReferralHistoryCard
-              title="Incoming Referral History"
-              referrals={incomingReferrals}
-              type="incoming"
+          {/* Right Column (Side Content) */}
+          <div className="lg:col-span-1 space-y-6">
+            <BedAvailabilityCard
+              availableBeds={currentFacility.availableBeds}
+              totalBeds={currentFacility.totalBeds}
+              crowdLevel={currentFacility.crowdLevel}
             />
-          ) : (
-            <ReferralHistoryCard
-              title="Outgoing Referral History"
-              referrals={outgoingReferrals}
-              type="outgoing"
+            <SystemStatsCard
+              facilities={mockFacilities}
+              onOpenSchedule={() => setIsScheduleModalOpen(true)}
             />
-          )}
+          </div>
         </div>
       </div>
 
@@ -143,5 +110,6 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
 
 

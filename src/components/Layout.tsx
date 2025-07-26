@@ -48,6 +48,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Plus className="h-4 w-4 inline mr-2" />
                 New Referral
               </Link>
+              <Link
+                to="/history"
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/history') 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                <History className="h-4 w-4 inline mr-2" />
+                History
+              </Link>
             </nav>
           </div>
         </div>

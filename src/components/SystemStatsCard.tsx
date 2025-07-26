@@ -22,9 +22,9 @@ const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ facilities, onOpenSch
           System Statistics
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div>
-          <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+          <h4 className="font-semibold text-foreground mb-1 flex items-center gap-2">
             <Users className="h-4 w-4" />
             Busiest Facilities (Last 24h)
           </h4>
