@@ -31,9 +31,9 @@ const ReferralHistoryCard: React.FC<ReferralHistoryCardProps> = ({ referrals }) 
   };
 
   return (
-    <Card className="medical-card">
+    <Card className="medical-card p-0">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-1 text-lg">
           <History className="h-5 w-5 text-primary" />
           Referral History
         </CardTitle>
@@ -60,16 +60,16 @@ const ReferralHistoryCard: React.FC<ReferralHistoryCardProps> = ({ referrals }) 
       </CardHeader>
       <CardContent>
         {filteredReferrals.length === 0 ? (
-          <p className="text-muted-foreground text-center py-6">
+          <p className="text-muted-foreground text-center py-2">
             No {filter} referrals found.
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filteredReferrals.map((referral) => (
-              <div key={referral.id} className="border border-border rounded-lg p-3">
-                <div className="flex items-start justify-between mb-2">
+              <div key={referral.id} className="border border-border rounded-lg p-3 transition-all hover:shadow-md">
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-foreground mb-1">
+                    <h4 className="font-semibold text-foreground">
                       {referral.patient.name} - {referral.diagnosis}
                     </h4>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -92,7 +92,7 @@ const ReferralHistoryCard: React.FC<ReferralHistoryCardProps> = ({ referrals }) 
                 </div>
                 
                 {referral.rejectionReason && referral.status === 'Rejected' && (
-                  <p className="text-xs text-red-600 mt-1 p-2 bg-red-50/50 rounded">
+                  <p className="text-xs text-red-600 mt-2 p-2 bg-red-50/50 rounded border border-red-100">
                     <strong>Reason:</strong> {referral.rejectionReason}
                   </p>
                 )}

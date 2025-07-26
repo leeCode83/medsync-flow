@@ -19,8 +19,8 @@ const BedAvailabilityCard: React.FC<BedAvailabilityCardProps> = ({
   totalBeds,
   crowdLevel,
 }) => {
-  const occupancyRate = totalBeds > 0 ? ((totalBeds - availableBeds) / totalBeds) * 100 : 0;
-  const chartData = [{ name: 'Occupancy', value: occupancyRate, fill: 'var(--color-occupancy)' }];
+  const availabilityRate = totalBeds > 0 ? (availableBeds / totalBeds) * 100 : 0;
+  const chartData = [{ name: 'availability', value: availabilityRate, fill: 'var(--color-availability)' }];
 
   const getCrowdLevelColor = (level: string) => {
     switch (level) {
@@ -43,8 +43,8 @@ const BedAvailabilityCard: React.FC<BedAvailabilityCardProps> = ({
         <div className="relative flex-1 flex items-center justify-center">
           <ChartContainer
             config={{
-              occupancy: {
-                label: 'Occupancy',
+              availability: {
+                label: 'Availability',
                 color: 'hsl(var(--chart-1))',
               },
             }}

@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Activity, Calendar, ArrowRight } from 'lucide-react';
+import { Search, MapPin, Activity, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ import {
   commonDiagnoses, 
   Facility 
 } from '@/lib/mock-data';
+import { provinces, City, District } from '@/lib/address-data';
 
 const NewReferral: React.FC = () => {
   const navigate = useNavigate();
@@ -24,10 +25,30 @@ const NewReferral: React.FC = () => {
     otherDiagnosis: '',
     procedures: [] as string[],
     otherProcedure: '',
-    patientAddress: '',
+    address: {
+      province: '',
+      city: '',
+      district: '',
+      fullAddress: ''
+    },
     urgency: '',
     notes: ''
   });
+
+  // Derived state for cascading dropdowns
+  const [selectedProvince, setSelectedProvince] = useState<string>('');
+  const [selectedCity, setSelectedCity] = useState<string>('');
+
+  const cities = useMemo(() => {
+    if (!selectedProvince) return [];
+    return provinces.find(p => p.id === selectedProvince)?.cities || [];
+  }, [selectedProvince]);
+
+  const districts = useMemo(() => {
+    if (!selectedCity) return [];
+    return cities.find(c => c.id === selectedCity)?.districts || [];
+  }, [selectedCity, cities]);
+
 
   // Results state
   const [recommendations, setRecommendations] = useState<Array<Facility & { score: number; reasons: string[] }>>([]);
@@ -36,6 +57,29 @@ const NewReferral: React.FC = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddressChange = (field: keyof typeof formData.address, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      address: { ...prev.address, [field]: value }
+    }));
+
+    if (field === 'province') {
+      setSelectedProvince(value);
+      setSelectedCity('');
+      setFormData(prev => ({
+        ...prev,
+        address: { ...prev.address, city: '', district: '' }
+      }));
+    }
+    if (field === 'city') {
+      setSelectedCity(value);
+      setFormData(prev => ({
+        ...prev,
+        address: { ...prev.address, district: '' }
+      }));
+    }
   };
 
   const handleProcedureToggle = (procedure: string) => {
@@ -58,10 +102,22 @@ const NewReferral: React.FC = () => {
       return;
     }
 
+    const provinceName = provinces.find(p => p.id === formData.address.province)?.name || '';
+    const cityName = cities.find(c => c.id === formData.address.city)?.name || '';
+    const districtName = districts.find(d => d.id === formData.address.district)?.name || '';
+
+    const fullAddress = [
+      formData.address.fullAddress,
+      districtName,
+      cityName,
+      provinceName,
+    ].filter(Boolean).join(', ');
+
+
     const results = getRecommendedFacilities(
       finalProcedures,
       finalDiagnosis,
-      formData.patientAddress
+      fullAddress
     );
     
     setRecommendations(results);
@@ -189,16 +245,58 @@ const NewReferral: React.FC = () => {
           </div>
 
           {/* Patient Address */}
-          <div className="space-y-2">
-            <Label htmlFor="address">Patient's Residential Address</Label>
-            <Input
-              id="address"
-              placeholder="Enter patient's address for distance calculation"
-              value={formData.patientAddress}
-              onChange={(e) => handleInputChange('patientAddress', e.target.value)}
-              className="medical-input"
-            />
+          <div className="space-y-4">
+            <Label>Patient's Residential Address</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Province */}
+              <div className="space-y-2">
+                <Label htmlFor="province">Province</Label>
+                <Select value={formData.address.province} onValueChange={(value) => handleAddressChange('province', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Province" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {provinces.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* City */}
+              <div className="space-y-2">
+                <Label htmlFor="city">City/Regency</Label>
+                <Select value={formData.address.city} onValueChange={(value) => handleAddressChange('city', value)} disabled={!selectedProvince}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select City/Regency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* District */}
+              <div className="space-y-2">
+                <Label htmlFor="district">District</Label>
+                <Select value={formData.address.district} onValueChange={(value) => handleAddressChange('district', value)} disabled={!selectedCity}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select District" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {districts.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fullAddress">Full Address</Label>
+              <Textarea
+                id="fullAddress"
+                placeholder="Enter street name, building, house number, etc."
+                value={formData.address.fullAddress}
+                onChange={(e) => handleAddressChange('fullAddress', e.target.value)}
+                className="medical-input"
+              />
+            </div>
           </div>
+
 
           {/* Urgency */}
           <div className="space-y-2">

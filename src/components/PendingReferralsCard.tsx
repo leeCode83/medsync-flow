@@ -90,19 +90,21 @@ const PendingReferralsCard: React.FC<PendingReferralsCardProps> = ({
                     <div className="flex items-center gap-2 ml-2">
                       <Button
                         variant="outline"
-                        size="icon"
-                        className="bg-green-100 text-green-700 hover:bg-green-200 h-8 w-8"
+                        size="sm"
+                        className="bg-green-100 text-green-700 hover:bg-green-200"
                         onClick={(e) => handleApproveClick(e, referral)}
                       >
-                        <Check className="h-4 w-4" />
+                        <Check className="h-4 w-4 mr-0" />
+                        Approve
                       </Button>
                       <Button
                         variant="outline"
-                        size="icon"
-                        className="bg-red-100 text-red-700 hover:bg-red-200 h-8 w-8"
+                        size="sm"
+                        className="bg-red-100 text-red-700 hover:bg-red-200"
                         onClick={(e) => handleRejectClick(e, referral)}
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-4 w-4 mr-0" />
+                        Reject
                       </Button>
                     </div>
                   </div>
@@ -111,7 +113,6 @@ const PendingReferralsCard: React.FC<PendingReferralsCardProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full"
                       onClick={() => handleViewDetails(referral)}
                     >
                       <Eye className="h-4 w-4 mr-2" />

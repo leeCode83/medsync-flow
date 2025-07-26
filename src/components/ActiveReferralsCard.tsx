@@ -25,13 +25,13 @@ const ActiveReferralsCard: React.FC<ActiveReferralsCardProps> = ({ referrals }) 
 
   return (
     <>
-      <Card className="medical-card">
+      <Card className="medical-card p-0">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <CardTitle className="flex items-center gap-1 text-lg">
             <Calendar className="h-5 w-5 text-primary" />
             Active Referrals
             {referrals.length > 0 && (
-              <span className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded-full">
+              <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                 {referrals.length}
               </span>
             )}
@@ -39,34 +39,29 @@ const ActiveReferralsCard: React.FC<ActiveReferralsCardProps> = ({ referrals }) 
         </CardHeader>
         <CardContent>
           {referrals.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6">
+            <p className="text-muted-foreground text-center py-2">
               No active referrals found.
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {referrals.map((referral) => (
-                <div key={referral.id} className="border border-border rounded-lg p-4 transition-all hover:shadow-md">
+                <div key={referral.id} className="border border-border rounded-lg p-3 transition-all hover:shadow-md">
                   {/* Top section */}
                   <div className="flex items-start justify-between">
-                    {/* Left side: Icon + Info */}
-                    <div className="flex items-start gap-4">
-                      <div className="bg-muted rounded-md h-12 w-12 flex-shrink-0 flex items-center justify-center">
-                        <FileText className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground">
-                          {referral.patient.name} - {referral.diagnosis}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          Referred on: {referral.createdAt.toLocaleDateString()}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          For: <strong>{referral.specialist}</strong>
-                        </p>
-                      </div>
+                    {/* Left side: Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground truncate">
+                        {referral.patient.name} - {referral.diagnosis}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Referred on: {referral.createdAt.toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        For: <strong>{referral.specialist}</strong>
+                      </p>
                     </div>
                     {/* Right side: Status */}
-                    <div>
+                    <div className="ml-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         referral.status === 'Approved' 
                           ? 'text-green-700 bg-green-100' 
@@ -77,7 +72,7 @@ const ActiveReferralsCard: React.FC<ActiveReferralsCardProps> = ({ referrals }) 
                     </div>
                   </div>
                   {/* Bottom section */}
-                  <div className="mt-4 flex items-center gap-4 border-t border-border pt-3">
+                  <div className="mt-3 flex items-center border-t border-border pt-3">
                     <Button 
                       variant="outline" 
                       size="sm"
